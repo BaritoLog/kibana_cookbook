@@ -1,0 +1,36 @@
+driver:
+  name: dokken
+  privileged: true # because Docker and SystemD/Upstart
+  chef_version: latest
+
+
+transport:
+  name: dokken
+
+provisioner:
+  name: dokken
+  deprecations_as_errors: true
+  chef_license: accept
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: ubuntu-18.04
+    driver:
+      image: dokken/ubuntu-18.04
+      pid_one_command: /bin/systemd
+      intermediate_instructions:
+        - RUN /usr/bin/apt-get update
+
+suites:
+  - name: member
+    run_list:
+      - recipe[elasticsearch_wrapper_cookbook::elasticsearch]
+    verifier:
+      inspec_tests:
+        - test/unit/spec
+    attributes:
+      elasticsearch:
+        hosts: ['member-opscode-ubuntu-1804-chef-14']
+        package_retries: 

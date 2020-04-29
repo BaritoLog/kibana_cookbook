@@ -38,7 +38,7 @@ describe file('/var/log/kibana.log') do
   its('mode') { should cmp '0644' }
 end
 
-describe command('curl -I http://127.0.0.1:5601/app/kibana') do
+describe command('curl -I http://192.168.33.10/test_cluster/app/kibana') do
   its(:stdout) { should match(%r{HTTP/1.1 200 OK}) }
   its(:stdout) { should match(/kbn-name: kibana/) }
 end
@@ -55,8 +55,7 @@ describe port(80) do
   it { should be_listening }
 end
 
-describe command('curl -I http://127.0.0.1/app/kibana') do
+describe command('curl -I http://192.168.33.10/test_cluster/app/kibana') do
   its(:stdout) { should match(%r{HTTP/1.1 200 OK}) }
   its(:stdout) { should match(/kbn-name: kibana/) }
-  its(:stdout) { should match(/kbn-version: 7.3.0/) }
 end

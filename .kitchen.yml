@@ -1,0 +1,100 @@
+---
+driver:
+  name: vagrant
+  product_version: 14.1.1
+
+provisioner:
+  name: chef_zero
+  # You may wish to disable always updating cookbooks in CI or other testing environments.
+  # For example:
+  #   always_update_cookbooks: <%= !ENV['CI'] %>
+  always_update_cookbooks: true
+  client_rb:
+    environment: _default
+    chef_license: accept
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: opscode-ubuntu-18.04-chef-14
+    driver:
+      box: bento/ubuntu-18.04
+    provisioner:
+      product_name: chef
+      product_version: latest
+
+suites:
+  - name: es01
+    driver:
+      vm_hostname: es01.elasticsearch.test
+      network:
+      - ["private_network", {ip: "192.168.20.10"}]
+      customize:
+        memory: 3072
+        cpus: 2
+    run_list:
+      - recipe[elasticsearch_wrapper_cookbook::elasticsearch]
+    verifier:
+      inspec_tests:
+        - test/unit/spec
+    attributes:
+      elasticsearch:
+        version: '7.6.0'
+        node_master: true
+        node_data: true
+        cluster_name: "test_cluster"
+        hosts: ['es01-opscode-ubuntu-1804-chef-14']
+        package_retries: 1
+        allocated_memory: 2048000
+        member_hosts: ["192.168.20.10"]
+        routing_allocation_disk_watermark_low_threshold: "90%"
+        routing_allocation_disk_watermark_high_threshold: "90%"
+        routing_allocation_disk_watermark_flood_stage_threshold: "95%"
+        index_number_of_replicas: 1
+  - name: es02
+    driver:
+      vm_hostname: es02.elasticsearch.test
+      network:
+      - ["private_network", {ip: "192.168.20.11"}]
+      customize:
+        memory: 3072
+        cpus: 2
+    run_list:
+      - recipe[elasticsearch_wrapper_cookbook::elasticsearch]
+    verifier:
+      inspec_tests:
+        - test/unit/spec
+    attributes:
+      elasticsearch:
+        version: '6.8.0'
+        node_master: true
+        node_data: true
+        cluster_name: "test_cluster"
+        hosts: ['es01-opscode-ubuntu-1804-chef-14']
+        package_retries: 1
+        allocated_memory: 2048000
+        member_hosts: ["192.168.20.11"]
+        routing_allocation_disk_watermark_low_threshold: "90%"
+        routing_allocation_disk_watermark_high_threshold: "90%"
+        routing_allocation_disk_watermark_flood_stage_threshold: "95%"
+        index_number_of_replicas: 1
+  - name: kibana
+    run_list:
+      - recipe[kibana::default]
+    driver_config:
+      customize:
+        memory: 1024
+      network:
+        - ['private_network', {ip: '192.168.33.10'}]
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    attributes:
+      kibana:
+        version: "6.8.0"
+        config:
+          version: "6.8.0"
+          server.basePath: "/test_cluster"
+          elasticsearch.hosts: ["http://192.168.20.11:9200"]
+          elasticsearch.url: ""
