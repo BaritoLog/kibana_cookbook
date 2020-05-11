@@ -13,7 +13,6 @@ override['kibana']['config']['logging.dest'] = '/var/log/kibana.log'
 default['kibana']['config']['server.basePath'] = '/test'
 default['kibana']['config']['server.port'] = '5601'
 default['kibana']['config']['server.host'] = 'localhost'
-default['kibana']['config']['xpack.security.enabled'] = false
 default['kibana']['config']['elasticsearch.url'] = 'http://elasticsearch.service.consul:9200'
 default['kibana']['config']['elasticsearch.hosts'] = ["http://elasticsearch.service.consul:9200"]
 default['kibana']['config']['elasticsearch.sniffInterval'] = false
@@ -21,6 +20,13 @@ default['kibana']['config']['elasticsearch.sniffOnStart'] = false
 default['kibana']['config']['elasticsearch.sniffOnConnectionFault'] = false
 default['kibana']['config']['prometheus_url'] = 'http://localhost'
 default['kibana']['config']['message_format'] = 'Warning: TPS exceeded on these apps: %s. Please ask app group owner to increase TPS.'
+
+default['kibana']['config']['security'] = {
+  "password" => "BOOTSTRAP_PASSWORD_CHANGE_ME", 
+  "username" => "kibana", 
+  "verificationMode" => "none", 
+  "xpack.security.enabled" => false
+}
 
 default['nginx']['default_site_enabled'] = false
 default['nginx']['user'] = node['kibana']['service_user']

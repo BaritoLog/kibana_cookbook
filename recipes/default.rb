@@ -14,7 +14,10 @@ kibana_config 'kibana' do
                 'elasticsearch.sniffOnStart' => node['kibana']['config']['elasticsearch.sniffOnStart'],
                 'elasticsearch.sniffOnConnectionFault' => node['kibana']['config']['elasticsearch.sniffOnConnectionFault'],
                 'logging.dest' => node['kibana']['config']['logging.dest'],
-    			'xpack.security.enabled' => node['kibana']['config']['xpack.security.enabled']
+                'xpack.security.enabled' => node['kibana']['config']['security']['xpack.security.enabled'],
+                'elasticsearch.username' => node['kibana']['config']['security']['username'],
+                'elasticsearch.password' => node['kibana']['config']['security']['password'],
+                'elasticsearch.ssl.verificationMode' => node['kibana']['config']['security']['verificationMode']
 end
 
 include_recipe "kibana::nginx_install"

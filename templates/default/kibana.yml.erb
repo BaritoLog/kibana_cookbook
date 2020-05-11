@@ -158,6 +158,14 @@ elasticsearch.ssl.verify: <%= @config['elasticsearch.ssl.verify'] %>
 #elasticsearch.ssl.verify: true
 <% end -%>
 
+# Controls the verification of the server certificate that Kibana receives 
+# when making an outbound SSL/TLS connection to Elasticsearch.
+<% if @config.key?('elasticsearch.ssl.verificationMode') %>
+elasticsearch.ssl.verificationMode: <%= @config['elasticsearch.ssl.verificationMode'] %>
+<% else -%>
+#elasticsearch.ssl.verificationMode: full
+<% end -%>
+
 # Time in milliseconds to wait for Elasticsearch to respond to pings. Defaults to the value of
 # the elasticsearch.requestTimeout setting.
 <% if @config.key?('elasticsearch.pingTimeout') %>
