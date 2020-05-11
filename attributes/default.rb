@@ -46,6 +46,8 @@ default['consul']['cli_opts'] = {
 # Attributes for elasalert
 default['elastalert']['repository'] = 'https://github.com/Yelp/elastalert.git'
 default['elastalert']['version'] = 'v0.2.4'
+default['elastalert']['python_version'] = '3.6'
+default['elastalert']['python_package_name'] = 'python3.6'
 
 default['elastalert']['elasticsearch']['hostname'] = 'localhost'
 default['elastalert']['elasticsearch']['port'] = 9200
