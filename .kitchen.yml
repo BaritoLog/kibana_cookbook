@@ -8,6 +8,7 @@ provisioner:
   # You may wish to disable always updating cookbooks in CI or other testing environments.
   # For example:
   #   always_update_cookbooks: <%= !ENV['CI'] %>
+  require_chef_omnibus: true
   always_update_cookbooks: true
   client_rb:
     environment: _default
@@ -40,7 +41,7 @@ suites:
         - test/unit/spec
     attributes:
       elasticsearch:
-        version: '7.6.0'
+        version: '7.5.0'
         node_master: true
         node_data: true
         cluster_name: "test_cluster"
@@ -51,7 +52,8 @@ suites:
         routing_allocation_disk_watermark_low_threshold: "90%"
         routing_allocation_disk_watermark_high_threshold: "90%"
         routing_allocation_disk_watermark_flood_stage_threshold: "95%"
-        index_number_of_replicas: 1
+        index_number_of_replicas: 0
+        minimum_master_nodes: 1
   - name: es02
     driver:
       vm_hostname: es02.elasticsearch.test
@@ -80,21 +82,26 @@ suites:
         routing_allocation_disk_watermark_flood_stage_threshold: "95%"
         index_number_of_replicas: 1
   - name: kibana
+    install_strategy: always
     run_list:
       - recipe[kibana::default]
+      - recipe[kibana::elastalert]
     driver_config:
       customize:
-        memory: 1024
+        memory: 2048
+        cpus: 2
       network:
         - ['private_network', {ip: '192.168.33.10'}]
     verifier:
       inspec_tests:
         - test/integration/default
     attributes:
+      elastalert_plugin:
+        version: "1.1.0"
       kibana:
-        version: "6.8.0"
+        version: "7.5.0"
         config:
-          version: "6.8.0"
+          version: "7.5.0"
           server.basePath: "/test_cluster"
-          elasticsearch.hosts: ["http://192.168.20.11:9200"]
-          elasticsearch.url: ""
+          elasticsearch.hosts: ["http://192.168.20.10:9200"]
+          elasticsearch.url: "http://192.168.20.10:9200"

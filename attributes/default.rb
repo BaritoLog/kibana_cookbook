@@ -1,7 +1,7 @@
 default['kibana']['url'] = nil
 default['kibana']['checksum'] = nil
 
-default['kibana']['version'] = '7.3.0'
+default['kibana']['version'] = '7.5.0'
 default['kibana']['distrib_checksum'] = 'd9d28d620a70a126747ee004042f4e728aaff05d9efc954739d3c15209acd4093321871423f486b51842a8e7b24ae969081702928802088c0e8bca22959e37aa'
 default['kibana']['distribution_base_url'] = 'https://artifacts.elastic.co/downloads/kibana'
 default['kibana']['user'] = 'kibana'
@@ -20,6 +20,9 @@ default['kibana']['config']['elasticsearch.sniffOnStart'] = false
 default['kibana']['config']['elasticsearch.sniffOnConnectionFault'] = false
 default['kibana']['config']['prometheus_url'] = 'http://localhost'
 default['kibana']['config']['message_format'] = 'Warning: TPS exceeded on these apps: %s. Please ask app group owner to increase TPS.'
+default['kibana']['config']['elastalert-kibana-plugin.serverHost'] = 'localhost'
+default['kibana']['config']['elastalert-kibana-plugin.serverPort'] = '3030'
+
 
 default['kibana']['config']['security'] = {
   "password" => "BOOTSTRAP_PASSWORD_CHANGE_ME", 
@@ -43,14 +46,19 @@ default['consul']['cli_opts'] = {
   'advertise' => node['ipaddress']
 }
 
+# Attributes for elasalert_server
+default['elastalert_server']['repository'] = 'https://github.com/bitsensor/elastalert.git'
+default['elastalert_server']['directory'] = '/opt/elastalert-server'
+
 # Attributes for elasalert
 default['elastalert']['repository'] = 'https://github.com/Yelp/elastalert.git'
 default['elastalert']['version'] = 'v0.2.4'
-default['elastalert']['python_version'] = '3.6'
-default['elastalert']['python_package_name'] = 'python3.6'
 
-default['elastalert']['elasticsearch']['hostname'] = 'localhost'
+default['elastalert']['elasticsearch']['hostname'] = 'elasticsearch.service.consul'
 default['elastalert']['elasticsearch']['port'] = 9200
+default['elastalert']['elasticsearch']['username'] = ''
+default['elastalert']['elasticsearch']['password'] = ''
+default['elastalert']['elasticsearch']['hostname'] = 'elasticsearch.service.consul'
 default['elastalert']['elasticsearch']['index'] = 'elastalert_status'
 default['elastalert']['elasticsearch']['index_old'] = ''
 default['elastalert']['elasticsearch']['url_prefix'] = ''
@@ -67,12 +75,8 @@ default['elastalert']['user'] = 'elastalert'
 default['elastalert']['user_home'] = "/home/#{node['elastalert']['user']}"
 default['elastalert']['group'] = 'elastalert'
 default['elastalert']['directory'] = '/opt/elastalert'
-default['elastalert']['rules_directory'] = "#{node['elastalert']['directory']}/rules"
-default['elastalert']['virtualenv']['directory'] = "#{node['elastalert']['directory']}/.env"
+default['elastalert']['rules_directory'] = "/rules"
+default['elastalert']['rule_templates_dir'] = "/rule_templates"
+default['elastalert_plugin']['version'] = '1.1.0'
 
-default['elastalert']['supervisor']['logfile'] = "#{node['elastalert']['log_dir']}/elastalert_supervisord.log"
-default['elastalert']['supervisor']['logfile_maxbytes'] = '1MB'
-default['elastalert']['supervisor']['logfile_backups'] = 2
-default['elastalert']['supervisor']['err_logfile'] = "#{node['elastalert']['log_dir']}/elastalert_stderr.log"
-default['elastalert']['supervisor']['err_logfile_maxbytes'] = '5MB'
-default['elastalert']['supervisor']['run_command'] = "#{node['elastalert']['virtualenv']['directory']}/bin/elastalert --config #{node['elastalert']['directory']}/config.yml --verbose"
+default['nodejs']['npm']['install_method'] = 'source'

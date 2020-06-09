@@ -13,5 +13,4 @@ source_url 'https://github.com/BaritoLog/kibana_cookbook'
 
 depends 'ark'
 depends 'systemd'
-depends 'poise-python'
-depends 'supervisor'
+depends 'nodejs'

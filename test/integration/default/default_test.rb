@@ -59,3 +59,33 @@ describe command('curl -I http://192.168.33.10/test_cluster/app/kibana') do
   its(:stdout) { should match(%r{HTTP/1.1 200 OK}) }
   its(:stdout) { should match(/kbn-name: kibana/) }
 end
+
+title 'elastalert'
+
+unless os.windows?
+  describe group('elastalert') do
+    it { should exist }
+  end
+
+  describe user('elastalert')  do
+    it { should exist }
+  end
+end
+
+describe file('/tmp/elastalert-kibana-plugin-1.0.3-6.8.0.zip') do
+  it { should be_file }
+  it { should be_owned_by 'kibana' }
+  it { should be_grouped_into 'kibana' }
+  it { should exist }
+end
+
+describe file('/opt/kibana/elastalert_plugin_installed.txt') do
+  it { should be_file }
+  it { should be_owned_by 'kibana' }
+  it { should be_grouped_into 'kibana' }
+  it { should exist }
+end
+
+describe port(3030) do
+  it { should be_listening }
+end

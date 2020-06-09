@@ -37,6 +37,17 @@ es_port: <%= node['elastalert']['elasticsearch']['port'] %>
 # Option basic-auth username and password for Elasticsearch
 #es_username: someusername
 #es_password: somepassword
+<% if not node['elastalert']['elasticsearch']['username'].empty? %>
+es_username: <%= node['elastalert']['elasticsearch']['username'] %>
+<% else -%>
+#es_password: "someusername"
+<% end -%>
+<% if not node['elastalert']['elasticsearch']['password'].empty? %>
+es_password: <%= node['elastalert']['elasticsearch']['password'] %>
+<% else -%>
+#es_password: "somepassword"
+<% end -%>
+
 
 # The index on es_host which is used for metadata storage
 # This can be a unmapped index, but it is recommended that you run

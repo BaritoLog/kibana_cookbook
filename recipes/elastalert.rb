@@ -11,29 +11,56 @@ elast_user = node['elastalert']['user']
 elast_user_home = node['elastalert']['user_home']
 elast_dir = node['elastalert']['directory']
 elast_rules_dir = node['elastalert']['rules_directory']
-elast_venv = node['elastalert']['virtualenv']['directory']
 elast_log_dir = node['elastalert']['log_dir']
-supervisor_logfile_path = node['elastalert']['supervisor']['logfile']
-supervisor_logfile_size = node['elastalert']['supervisor']['logfile_maxbytes']
-supervisor_logfile_backups = node['elastalert']['supervisor']['logfile_backups']
-supervisor_err_logfile_path = node['elastalert']['supervisor']['err_logfile']
-supervisor_err_logfile_size = node['elastalert']['supervisor']['err_logfile_maxbytes']
-supervisor_run_command = node['elastalert']['supervisor']['run_command']
-python_version = node['elastalert']['python_version']
-python_package_name = node['elastalert']['python_package_name']
 
-group elast_group
+elast_server_repo = node['elastalert_server']['repository']
+elast_server_dir = node['elastalert_server']['directory']
+rule_templates_dir = node['elastalert']['rule_templates_dir']
+
+kibana_dir = node['kibana']['config']['base_dir']
+kibana_ver = node['kibana']['version']
+kibana_user = node['kibana']['user']
+kibana_group = node['kibana']['group']
+elastalert_plugin_ver = node['elastalert_plugin']['version']
+
+elastalert_plugin_name = "elastalert-kibana-plugin-#{elastalert_plugin_ver}-#{kibana_ver}"
+
+if Chef::VERSION.split('.')[0].to_i > 12
+  apt_update
+else
+  apt_update 'apt update' do
+    action :update
+  end
+end
+
+%w(python3-pip python3-setuptools build-essential libssl-dev libffi-dev python3-dev).each do |package|
+  apt_package package
+end
+
+group elast_group do
+  system true
+end
 
 user elast_user do
+  comment "#{elast_user} user"
   group elast_group
   home elast_user_home
   manage_home true
+  system true
 end
+
+# remote_file "/tmp/#{elastalert_plugin_name}.zip" do
+#   source "https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/#{elastalert_plugin_ver}/elastalert-kibana-plugin-#{elastalert_plugin_ver}-#{kibana_ver}.zip"
+#   owner kibana_user
+#   group kibana_group
+#   not_if { ::File.exist?("/tmp/#{elastalert_plugin_name}.zip") }
+# end
 
 directory elast_dir do
   owner elast_user
   group elast_group
   mode '0755'
+  recursive true
 end
 
 git elast_repo do
@@ -45,88 +72,140 @@ git elast_repo do
   action :checkout
 end
 
-# needed for python
-%w(build-essential python-dev libffi-dev).each do |package|
-  apt_package package
+execute 'pip_install' do
+  command "pip3 install setuptools>=11.3"
+end
+execute 'pip_install' do
+  command "pip3 install jira>=2.0.0"
 end
 
-# requriment of elastalert
-python_runtime python_version do
-    provider :system # This is already the default on Ubuntu but restating for clarity
-    options package_name: python_package_name
-end
-
-python_virtualenv elast_venv do
-  group elast_group
-  user elast_user
-  not_if { ::File.exist?(elast_venv) }
-end
-
-python_execute "#{elast_dir}/setup.py install" do
-  user elast_user
-  group elast_group
-  virtualenv elast_venv
+execute 'python setup.py install' do
+  command "python3 setup.py install"
   cwd elast_dir
-  not_if { ::File.exist?("#{elast_venv}/bin/elastalert-create-index") }
-  notifies :install, "pip_requirements[#{elast_dir}/requirements.txt]", :immediately
 end
 
-pip_requirements "#{elast_dir}/requirements.txt" do
-  user elast_user
-  group elast_group
-  virtualenv elast_venv
-  options '-v'
-  cwd elast_dir
-  retries 1 # 1st try fails on clean up step when trying to remove not existing file, 2nd try is successful
-  action :nothing
-end
-
-python_execute 'setup elastalert index' do
-  command "#{elast_venv}/bin/elastalert-create-index --host #{elast_es_host} --port #{elast_es_port} --index '#{elast_es_index}' --url-prefix '#{elast_es_url_prefix}' --old-index '#{elast_es_old_index}' #{elast_es_index_create_opts}"
-  user elast_user
-  group elast_group
-  virtualenv elast_venv
-  cwd elast_dir
-  not_if "curl -XGET 'http://#{elast_es_host}:#{elast_es_port}/#{elast_es_index}/' -s | grep '@timestamp'"
+execute 'pip_install' do
+  command "pip3 install -r #{elast_dir}/requirements.txt"
 end
 
 directory elast_rules_dir do
   user elast_user
   group elast_group
   mode '0755'
-end
-
-managed_directory elast_rules_dir do
-  clean_directories true
-end
-
-include_recipe 'supervisor'
-
-template "#{elast_dir}/config.yml" do
-  source '/default/elastalert/elastalert.yml.erb'
-  owner elast_user
-  group elast_group
-  mode '0755'
+  recursive true
 end
 
 directory elast_log_dir do
   user elast_user
   group elast_group
   mode '0755'
+  recursive true
 end
 
-supervisor_service 'elastalert' do
-  action [:enable, :start]
-  autostart true
+#setup elastalert server
+directory elast_server_dir do
+  owner elast_user
+  group elast_group
+  mode '0755'
+  recursive true
+end
+
+git elast_server_repo do
+  repository elast_server_repo
+  destination elast_server_dir
   user elast_user
-  stdout_logfile supervisor_logfile_path
-  stdout_logfile_maxbytes supervisor_logfile_size
-  stdout_logfile_backups supervisor_logfile_backups
-  directory '%(here)s'
-  serverurl 'unix:///var/run/elastalert_supervisor.sock'
-  startsecs 15
-  stopsignal 'INT'
-  stderr_logfile supervisor_err_logfile_path
-  stderr_logfile_maxbytes supervisor_err_logfile_size
-  command supervisor_run_command
+  group elast_group
+  action :sync
+end
+
+# include_recipe "nodejs::npm"
+
+# npm_package 'elastalert' do
+#   path "#{elast_server_dir}" # The root path to your project, containing a package.json file
+#   json true
+#   user elast_user
+#   options ['--production', '--quite'] # Only install dependencies. Skip devDependencies
+# end
+
+# curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+# sudo apt-get install -y nodejs
+
+# mkdir -p /opt/elastalert/rules/ /opt/elastalert/server_data/tests/
+
+execute 'download nodejs' do
+  command "sudo curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -"
+end
+
+apt_package "nodejs"
+
+execute "npm install elastalert" do
+  command "npm install --production --quiet"
+  cwd elast_server_dir
+end
+
+# execute "Download elastalert plugin" do
+#   command "wget -O /tmp/#{elastalert_plugin_name}.zip https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/#{elastalert_plugin_ver}/elastalert-kibana-plugin-#{elastalert_plugin_ver}-#{kibana_ver}.zip"
+#   user kibana_user
+#   group kibana_group
+#   not_if { ::File.exist?("/tmp/#{elastalert_plugin_name}.zip") }
+# end
+
+remote_file "/tmp/#{elastalert_plugin_name}.zip" do
+  source "https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/#{elastalert_plugin_ver}/elastalert-kibana-plugin-#{elastalert_plugin_ver}-#{kibana_ver}.zip"
+  user kibana_user
+  group kibana_group
+  not_if { ::File.exist?("/tmp/#{elastalert_plugin_name}.zip") }
+end
+
+execute 'install elastalert plugin' do
+  command "#{kibana_dir}/#{kibana_ver}/current/bin/kibana-plugin install file:///tmp/#{elastalert_plugin_name}.zip"
+  user kibana_user
+  group kibana_group
+  not_if { ::File.exist?("#{kibana_dir}/elastalert_plugin_installed.txt") }
+end
+
+file "#{kibana_dir}/elastalert_plugin_installed.txt" do
+  owner kibana_user
+  group kibana_group
+  not_if { ::File.exist?("#{kibana_dir}/elastalert_plugin_installed.txt") }
+end
+
+template "#{elast_dir}/config.yml" do
+  source '/default/elastalert/config.yml.erb'
+  owner elast_user
+  group elast_group
+  mode '0755'
+end
+
+template "#{elast_dir}/config-test.yaml" do
+  source '/default/elastalert/config.yml.erb'
+  owner elast_user
+  group elast_group
+  mode '0755'
+end
+
+execute "cp rule_templates to elastalert" do
+  command "cp -rp #{elast_server_dir}/rule_templates #{elast_dir}/rule_templates"
+  user elast_user
+  group elast_group
+  not_if { ::File.exist?("#{elast_dir}/rule_templates") }
+end
+
+execute "cp elastalert_modules to elastalert" do
+  command "cp -rp #{elast_server_dir}/elastalert_modules #{elast_dir}/elastalert_modules"
+  user elast_user
+  group elast_group
+  not_if { ::File.exist?("#{elast_dir}/elastalert_modules") }
+end
+
+execute "npm start" do
+  command "npm start"
+  user elast_user
+  group elast_group
+  cwd elast_server_dir
+end
+
+service 'kibana' do
+  supports start: true, restart: true, stop: true, status: true
+  action [:enable, :restart]
 end
