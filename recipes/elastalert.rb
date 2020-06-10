@@ -84,8 +84,9 @@ execute 'python setup.py install' do
   cwd elast_dir
 end
 
-execute 'pip_install' do
-  command "pip3 install -r #{elast_dir}/requirements.txt"
+execute 'pip_install requirement' do
+  command "sed -i 's/jira>=1.0.10,<1.0.15/jira>=2.0.0/g' requirements.txt && pip3 install -r #{elast_dir}/requirements.txt"
+  cwd elast_dir
 end
 
 directory elast_rules_dir do

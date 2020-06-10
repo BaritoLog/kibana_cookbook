@@ -89,7 +89,7 @@ suites:
     driver_config:
       customize:
         memory: 2048
-        cpus: 2
+        cpus: 1
       network:
         - ['private_network', {ip: '192.168.33.10'}]
     verifier:
