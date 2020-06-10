@@ -75,9 +75,6 @@ end
 execute 'pip_install' do
   command "pip3 install setuptools>=11.3"
 end
-execute 'pip_install' do
-  command "pip3 install jira>=2.0.0"
-end
 
 execute 'python setup.py install' do
   command "python3 setup.py install"
