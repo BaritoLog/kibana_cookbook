@@ -75,8 +75,8 @@ default['elastalert']['user'] = 'elastalert'
 default['elastalert']['user_home'] = "/home/#{node['elastalert']['user']}"
 default['elastalert']['group'] = 'elastalert'
 default['elastalert']['directory'] = '/opt/elastalert'
-default['elastalert']['rules_directory'] = "/rules"
-default['elastalert']['rule_templates_dir'] = "/rule_templates"
+default['elastalert']['rules_directory'] = "rules"
+default['elastalert']['rule_templates_dir'] = "rule_templates"
 default['elastalert_plugin']['version'] = '1.1.0'
 
 default['nodejs']['npm']['install_method'] = 'source'

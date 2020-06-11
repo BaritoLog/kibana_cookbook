@@ -168,15 +168,15 @@ file "#{kibana_dir}/elastalert_plugin_installed.txt" do
   not_if { ::File.exist?("#{kibana_dir}/elastalert_plugin_installed.txt") }
 end
 
-template "#{elast_dir}/config.yml" do
-  source '/default/elastalert/config.yml.erb'
+template "#{elast_dir}/config.yaml" do
+  source '/default/elastalert/config.yaml.erb'
   owner elast_user
   group elast_group
   mode '0755'
 end
 
 template "#{elast_dir}/config-test.yaml" do
-  source '/default/elastalert/config.yml.erb'
+  source '/default/elastalert/config.yaml.erb'
   owner elast_user
   group elast_group
   mode '0755'
@@ -194,6 +194,11 @@ execute "cp elastalert_modules to elastalert" do
   user elast_user
   group elast_group
   not_if { ::File.exist?("#{elast_dir}/elastalert_modules") }
+end
+
+execute "change python symlink" do
+  command 'rm -rf python && ln -s python3 python'
+  cwd '/usr/bin'
 end
 
 execute "npm start" do
