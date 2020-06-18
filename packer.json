@@ -1,29 +1,41 @@
 {
-    "variables": {
-      "build_version": "{{env `BUILD_VERSION`}}",
-      "build_commit_sha": "{{env `BUILD_COMMIT_SHA`}}",
-      "output_image": "{{env `OUTPUT_IMAGE`}}",
-      "cookbook_paths": "{{env `COOKBOOK_PATHS`}}"
-    },
-    "builders": [
-      {
-        "type": "lxd",
-        "image": "ubuntu:18.04",
-        "output_image": "{{user `output_image`}}",
-        "publish_properties": {
-          "version": "{{user `build_version`}}",
-          "commit_sha": "{{user `build_commit_sha`}}",
-          "description": "LXD image for kibana"
+  "variables": {
+    "build_commit_sha": "{{env `BUILD_COMMIT_SHA`}}",
+    "build_version": "{{env `BUILD_VERSION`}}",
+    "builders_image": "{{env `BUILDERS_IMAGE`}}",
+    "cookbook_paths": "{{env `COOKBOOK_PATHS`}}",
+    "output_image": "{{env `OUTPUT_IMAGE`}}"
+  },
+  "builders": [
+    {
+      "type": "lxd",
+      "image": "{{user `builders_image`}}",
+      "output_image": "{{user `output_image`}}",
+      "publish_properties": {
+        "version": "{{user `build_version`}}",
+        "commit_sha": "{{user `build_commit_sha`}}",
+        "description": "LXD image for kibana"
+      },
+      "init_sleep": "5"
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "chef-solo",
+      "cookbook_paths": ["{{user `cookbook_paths`}}"],
+      "run_list": [
+        "recipe[kibana::default]",
+        "recipe[kibana::elastalert]",
+        "recipe[prometheus::kibana_exporter]"
+      ],
+      "json": {
+        "kibana": {
+          "version": "7.5.0"
         },
-        "init_sleep": "5"
+        "kibana_exporter": {
+          "kibana_version": "7.5.0"
+        }
       }
-    ],
-    "provisioners": [
-      {
-        "type": "chef-solo",
-        "cookbook_paths": ["{{user `cookbook_paths`}}"],
-        "run_list": ["recipe[kibana::default]", "recipe[prometheus::kibana_exporter]"]
-      }
-    ]
-  }
-  
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+stages:
+  - validate
+  - build-base
+
+variables:
+  BUILD_COMMIT_SHA: "$CI_COMMIT_SHA"
+  BUILD_VERSION: "$CI_COMMIT_TAG"
+  BUILDERS_IMAGE: "ubuntu-minimal:18.04"
+  COOKBOOK_PATHS: "./cookbooks"
+  IMAGE_REGISTRY: "barito-registry"
+  OUTPUT_IMAGE: "lxd-ubuntu-minimal-kibana-$CI_COMMIT_TAG"
+  TEMPLATE_FILE: "./packer.json"
+
+before_script:
+  - curl -s https://raw.githubusercontent.com/BaritoLog/cx-scripts/master/gitlabci-install-packer.sh | bash
+
+validate-image:
+  stage: validate
+  script:
+    - ./packer/packer validate $TEMPLATE_FILE
+  tags:
+    - bionic
+
+build-base-image:
+  stage: build-base
+  script:
+    - curl -s https://raw.githubusercontent.com/BaritoLog/cx-scripts/master/gitlabci-build-base.sh | bash
+    - curl -s https://raw.githubusercontent.com/BaritoLog/cx-scripts/master/gitlabci-copy-image.sh | bash
+  tags:
+    - bionic
+    - lxd
+    - lxc
+  only:
+    - tags
