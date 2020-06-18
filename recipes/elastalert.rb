@@ -71,7 +71,7 @@ end
 
 file "/usr/bin/python" do
   action :delete
-  not_if { ::File.exist?("/usr/bin/python") }
+  only_if { ::File.exist?("/usr/bin/python") }
 end
 
 link '/usr/bin/python' do
