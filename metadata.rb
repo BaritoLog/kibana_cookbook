@@ -4,7 +4,7 @@ maintainer_email 'baritolog@go-jek.com'
 license 'Apache-2.0'
 description 'Installs/Configures Kibana'
 long_description 'Installs/Configures Kibana'
-version '7.3.0'
+version '7.5.0'
 supports 'ubuntu'
 chef_version '>= 14.1.1' if respond_to?(:chef_version)
 
