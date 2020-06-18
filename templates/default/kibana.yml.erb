@@ -42,19 +42,19 @@ server.name: <%= @config['server.name'] %>
 <% end -%>
 
 <% if @config['kibana.version'] >= '7.0.0' %>
-    # The URL of the multinode Elasticsearch instance to use for all your queries.
-    <% if @config.key?('elasticsearch.hosts') %>
-    elasticsearch.hosts: <%= @config['elasticsearch.hosts'] %>
-    <% else -%>
-    #elasticsearch.hosts: ["http://localhost:9200"]
-    <% end -%>
+# The URL of the multinode Elasticsearch instance to use for all your queries.
+<% if @config.key?('elasticsearch.hosts') %>
+elasticsearch.hosts: <%= @config['elasticsearch.hosts'] %>
 <% else -%>
-    # The URL of the Elasticsearch instance to use for all your queries.
-    <% if @config.key?('elasticsearch.url') && !@config['elasticsearch.url'].empty? %>
-    elasticsearch.url: <%= @config['elasticsearch.url'] %>
-    <% else -%>
-    #elasticsearch.url: "http://localhost:9200"
-    <% end -%>
+#elasticsearch.hosts: ["http://localhost:9200"]
+<% end -%>
+<% else -%>
+# The URL of the Elasticsearch instance to use for all your queries.
+<% if @config.key?('elasticsearch.url') && !@config['elasticsearch.url'].empty? %>
+elasticsearch.url: <%= @config['elasticsearch.url'] %>
+<% else -%>
+#elasticsearch.url: "http://localhost:9200"
+<% end -%>
 <% end -%>
 
 # Time in milliseconds between requests to check Elasticsearch for an updated list of nodes.
@@ -158,7 +158,7 @@ elasticsearch.ssl.verify: <%= @config['elasticsearch.ssl.verify'] %>
 #elasticsearch.ssl.verify: true
 <% end -%>
 
-# Controls the verification of the server certificate that Kibana receives 
+# Controls the verification of the server certificate that Kibana receives
 # when making an outbound SSL/TLS connection to Elasticsearch.
 <% if @config.key?('xpack.security.enabled') && @config.key?('elasticsearch.ssl.verificationMode') %>
 elasticsearch.ssl.verificationMode: <%= @config['elasticsearch.ssl.verificationMode'] %>

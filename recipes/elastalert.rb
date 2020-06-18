@@ -1,3 +1,8 @@
+kibana_dir = node['kibana']['config']['base_dir']
+kibana_ver = node['kibana']['version']
+kibana_user = node['kibana']['user']
+kibana_group = node['kibana']['group']
+
 elast_ver = node['elastalert']['version']
 elast_repo = node['elastalert']['repository']
 elast_es_host = node['elastalert']['elasticsearch']['hostname']
@@ -14,15 +19,10 @@ elast_rules_dir = node['elastalert']['rules_directory']
 elast_log_dir = node['elastalert']['log_dir']
 
 elast_server_repo = node['elastalert_server']['repository']
+elast_server_name = "elastalert_server"
 elast_server_dir = node['elastalert_server']['directory']
 rule_templates_dir = node['elastalert']['rule_templates_dir']
-
-kibana_dir = node['kibana']['config']['base_dir']
-kibana_ver = node['kibana']['version']
-kibana_user = node['kibana']['user']
-kibana_group = node['kibana']['group']
 elastalert_plugin_ver = node['elastalert_plugin']['version']
-
 elastalert_plugin_name = "elastalert-kibana-plugin-#{elastalert_plugin_ver}-#{kibana_ver}"
 
 if Chef::VERSION.split('.')[0].to_i > 12
@@ -49,13 +49,6 @@ user elast_user do
   system true
 end
 
-# remote_file "/tmp/#{elastalert_plugin_name}.zip" do
-#   source "https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/#{elastalert_plugin_ver}/elastalert-kibana-plugin-#{elastalert_plugin_ver}-#{kibana_ver}.zip"
-#   owner kibana_user
-#   group kibana_group
-#   not_if { ::File.exist?("/tmp/#{elastalert_plugin_name}.zip") }
-# end
-
 directory elast_dir do
   owner elast_user
   group elast_group
@@ -74,6 +67,15 @@ end
 
 execute 'pip_install' do
   command "pip3 install setuptools>=11.3"
+end
+
+file "/usr/bin/python" do
+  action :delete
+  not_if { ::File.exist?("/usr/bin/python") }
+end
+
+link '/usr/bin/python' do
+  to '/usr/bin/python3'
 end
 
 execute 'python setup.py install' do
@@ -100,7 +102,6 @@ directory elast_log_dir do
   recursive true
 end
 
-#setup elastalert server
 directory elast_server_dir do
   owner elast_user
   group elast_group
@@ -116,20 +117,6 @@ git elast_server_repo do
   action :sync
 end
 
-# include_recipe "nodejs::npm"
-
-# npm_package 'elastalert' do
-#   path "#{elast_server_dir}" # The root path to your project, containing a package.json file
-#   json true
-#   user elast_user
-#   options ['--production', '--quite'] # Only install dependencies. Skip devDependencies
-# end
-
-# curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -
-# sudo apt-get install -y nodejs
-
-# mkdir -p /opt/elastalert/rules/ /opt/elastalert/server_data/tests/
-
 execute 'download nodejs' do
   command "sudo curl -sL https://deb.nodesource.com/setup_14.x | sudo -E bash -"
 end
@@ -140,13 +127,6 @@ execute "npm install elastalert" do
   command "npm install --production --quiet"
   cwd elast_server_dir
 end
-
-# execute "Download elastalert plugin" do
-#   command "wget -O /tmp/#{elastalert_plugin_name}.zip https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/#{elastalert_plugin_ver}/elastalert-kibana-plugin-#{elastalert_plugin_ver}-#{kibana_ver}.zip"
-#   user kibana_user
-#   group kibana_group
-#   not_if { ::File.exist?("/tmp/#{elastalert_plugin_name}.zip") }
-# end
 
 remote_file "/tmp/#{elastalert_plugin_name}.zip" do
   source "https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/#{elastalert_plugin_ver}/elastalert-kibana-plugin-#{elastalert_plugin_ver}-#{kibana_ver}.zip"
@@ -196,16 +176,26 @@ execute "cp elastalert_modules to elastalert" do
   not_if { ::File.exist?("#{elast_dir}/elastalert_modules") }
 end
 
-execute "change python symlink" do
-  command 'rm -rf python && ln -s python3 python'
-  cwd '/usr/bin'
+template "/etc/systemd/system/#{elast_server_name}.service" do
+  source "/default/elastalert/elastalert_server_systemd.erb"
+  owner elast_user
+  group elast_group
+  mode '0644'
+  variables app_name: elast_server_name,
+            user: elast_user,
+            app_directory: "#{elast_server_dir}"
+  notifies :run, "execute[systemctl-daemon-reload]", :immediately
+  notifies :restart, "service[#{elast_server_name}]", :delayed
 end
 
-execute "npm start" do
-  command "npm start"
-  user elast_user
-  group elast_group
-  cwd elast_server_dir
+execute 'systemctl-daemon-reload' do
+  command '/bin/systemctl --system daemon-reload'
+end
+
+service "#{elast_server_name}" do
+  action :enable
+  supports :status => true, :start => true, :restart => true, :stop => true
+  provider Chef::Provider::Service::Systemd
 end
 
 service 'kibana' do
