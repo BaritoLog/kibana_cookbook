@@ -1,0 +1,37 @@
+{
+  "name": "elasticsearch_wrapper_cookbook",
+  "description": "Installs/Configures elasticsearch_wrapper_cookbook",
+  "long_description": "Installs/Configures elasticsearch_wrapper_cookbook",
+  "maintainer": "GO-JEK Engineering",
+  "maintainer_email": "baritolog@go-jek.com",
+  "license": "Apache-2.0",
+  "platforms": {
+
+  },
+  "dependencies": {
+    "java": ">= 0.0.0",
+    "elasticsearch": ">= 0.0.0",
+    "ark": ">= 0.0.0"
+  },
+  "providing": {
+
+  },
+  "recipes": {
+
+  },
+  "version": "7.3.0",
+  "source_url": "https://github.com/BaritoLog/elasticsearch_wrapper_cookbook",
+  "issues_url": "https://github.com/BaritoLog/elasticsearch_wrapper_cookbook/issues",
+  "privacy": false,
+  "chef_versions": [
+    [
+      ">= 12.14"
+    ]
+  ],
+  "ohai_versions": [
+
+  ],
+  "gems": [
+
+  ]
+}

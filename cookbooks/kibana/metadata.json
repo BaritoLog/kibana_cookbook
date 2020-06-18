@@ -1,0 +1,37 @@
+{
+  "name": "kibana",
+  "description": "Installs/Configures Kibana",
+  "long_description": "Installs/Configures Kibana",
+  "maintainer": "GOJEK Engineering",
+  "maintainer_email": "baritolog@go-jek.com",
+  "license": "Apache-2.0",
+  "platforms": {
+    "ubuntu": ">= 0.0.0"
+  },
+  "dependencies": {
+    "ark": ">= 0.0.0",
+    "systemd": ">= 0.0.0",
+    "nodejs": ">= 0.0.0"
+  },
+  "providing": {
+
+  },
+  "recipes": {
+
+  },
+  "version": "7.5.0",
+  "source_url": "https://github.com/BaritoLog/kibana_cookbook",
+  "issues_url": "https://github.com/BaritoLog/kibana_cookbook/issues",
+  "privacy": false,
+  "chef_versions": [
+    [
+      ">= 14.1.1"
+    ]
+  ],
+  "ohai_versions": [
+
+  ],
+  "gems": [
+
+  ]
+}

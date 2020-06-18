@@ -1,0 +1,34 @@
+stages:
+  - validate
+  - build-base
+
+variables:
+  BUILD_VERSION: "$CI_COMMIT_TAG"
+  BUILD_COMMIT_SHA: "$CI_COMMIT_SHA"
+  OUTPUT_IMAGE: "lxd-ubuntu-minimal-elasticsearch-$CI_COMMIT_TAG"
+  IMAGE_REGISTRY: "barito-registry"
+  COOKBOOK_PATHS: "./cookbooks"
+  BUILDERS_IMAGE: "ubuntu-minimal:18.04"
+  TEMPLATE_FILE: "./packer.json"
+
+before_script:
+    - curl -s https://raw.githubusercontent.com/BaritoLog/cx-scripts/master/gitlabci-install-packer.sh | bash
+
+validate:
+  stage: validate
+  script:
+    - ./packer/packer validate $TEMPLATE_FILE
+  tags:
+    - bionic
+
+build-base:
+  stage: build-base
+  script:
+    - curl -s https://raw.githubusercontent.com/BaritoLog/cx-scripts/master/gitlabci-build-base.sh | bash
+    - curl -s https://raw.githubusercontent.com/BaritoLog/cx-scripts/master/gitlabci-copy-image.sh | bash
+  tags:
+    - bionic
+    - lxd
+    - lxc
+  only:
+  - tags

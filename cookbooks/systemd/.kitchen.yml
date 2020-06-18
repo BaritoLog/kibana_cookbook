@@ -1,0 +1,36 @@
+---
+settings:
+  parallel: true
+
+driver:
+  name: vagrant
+
+provisioner:
+  name: chef_zero
+  # our tmp.mount test unit masks default /tmp path on ubuntu
+  root_path: /var/tmp/kitchen
+
+verifier:
+  name: inspec
+
+platforms:
+  - name: centos-7.4
+  - name: fedora-27
+    run_list:
+      - recipe[yum::dnf_yum_compat]
+  - name: debian-9.3
+    run_list:
+      - recipe[debian::backports]
+      - recipe[apt]
+  - name: ubuntu-16.04
+    run_list:
+      - recipe[apt]
+
+suites:
+  - name: default
+    run_list:
+      - recipe[chef-sugar::default]
+      - recipe[test::default]
+    attributes:
+      systemd:
+        hostname: my-hostname.example.com

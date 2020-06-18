@@ -1,0 +1,10 @@
+<%= @log_file %> {
+    daily
+    missingok
+    rotate 7
+    delaycompress
+    compress
+    copytruncate
+    notifempty
+    su root root
+}

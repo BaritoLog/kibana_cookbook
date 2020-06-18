@@ -1,0 +1,20 @@
+{
+  "appName": "elastalert-server",
+  "port": 3030,
+  "wsport": 3333,
+  "elastalertPath": "<%= node['elastalert']['directory'] %>",
+  "verbose": false,
+  "es_debug": false,
+  "debug": false,
+  "rulesPath": {
+    "relative": true,
+    "path": "<%= node['elastalert']['rules_directory'] %>"
+  },
+  "templatesPath": {
+    "relative": true,
+    "path": "<%= node['elastalert']['rule_templates_dir'] %>"
+  },
+  "es_host": "<%= node['elastalert']['elasticsearch']['hostname'] %>",
+  "es_port": "<%= node['elastalert']['elasticsearch']['port'] %>",
+  "writeback_index": "elastalert_status"
+}

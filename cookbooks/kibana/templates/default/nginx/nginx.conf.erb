@@ -1,0 +1,87 @@
+server {
+  listen       <%= @listen_port %>;
+  server_name  <%= @server_name %>;
+
+
+  client_max_body_size 50M;
+
+  error_log   /var/log/nginx/<%= @server_name %>-errors.log;
+  access_log  /var/log/nginx/<%= @server_name %>.log;
+
+  location = /tps-banner-prometheus-query {
+    internal;
+
+    proxy_set_header Accept-Encoding "";
+    proxy_pass <%= @tps_banner_prometheus_query_url %>;
+    proxy_connect_timeout 100ms;
+    proxy_read_timeout 100ms;
+  }
+
+  location = <%= @base_path %>/_barito.js {
+    content_by_lua_block {
+      local cjson = require "cjson"
+
+      local response = ngx.location.capture("/tps-banner-prometheus-query")
+      if response.status == 200 then
+        body = cjson.decode(response.body)
+
+        if body.status == "success" then
+          local app_names_message = ""
+          for i, result in pairs(body.data.result) do
+            app_name = string.sub(result.metric.topic, 0, -4)
+            app_names_message = app_names_message .. app_name .. ", "
+          end
+
+          if string.len(app_names_message) > 0 then
+            app_names_message = string.sub(app_names_message, 0, -3)
+            ngx.say([[
+              let style = document.createElement("style");
+              document.head.appendChild(style);
+              style.sheet.insertRule(".global-nav, .app-wrapper, .chrHeaderWrapper, .euiNavDrawer { margin-top: 42px !important }", 0);
+
+              let banner = document.createElement("div");
+              banner.innerHTML = "]] .. string.format("<%= @message_format %>", app_names_message) .. [[";
+              banner.style.backgroundColor = "red";
+              banner.style.color = "white";
+              banner.style.fontFamily = "Arial, Helvetica, sans-serif";
+              banner.style.fontSize = "22px";
+              banner.style.lineHeight = "1";
+              banner.style.overflowX = "scroll";
+              banner.style.padding = "10px";
+              banner.style.position = "fixed";
+              banner.style.textAlign = "center";
+              banner.style.top = "0";
+              banner.style.whiteSpace = "nowrap";
+              banner.style.width = "100%";
+              banner.style.zIndex = "1000";
+
+              document.body.appendChild(banner);
+              let observer = new MutationObserver(function(mutations) {
+                for (let mutation of mutations) {
+                  for (let removedNode of mutation.removedNodes) {
+                    if (removedNode == banner) {
+                      document.body.appendChild(banner);
+                    }
+                  }
+                }
+              });
+              observer.observe(document.body, { childList: true });
+            ]]);
+          end
+        end
+      end
+    }
+  }
+  
+  location ~ ^<%= @base_path %>/?(.*)$ {
+    sub_filter '</body>' '<script src="<%= @base_path %>/_barito.js"></script></body>';
+    sub_filter_once on;
+
+    rewrite ^<%= @base_path %>/?(.*)$ /$1 break;
+    root /opt/kibana/current;
+    index index.html index.htm;
+
+    proxy_set_header Accept-Encoding "";
+    proxy_pass http://127.0.0.1:<%= @kibana_port %>;
+  }
+}
