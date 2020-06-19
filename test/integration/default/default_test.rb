@@ -72,18 +72,39 @@ unless os.windows?
   end
 end
 
-describe file('/tmp/elastalert-kibana-plugin-1.0.3-6.8.0.zip') do
+describe file('/opt/kibana/elastalert_plugin_installed.txt') do
   it { should be_file }
   it { should be_owned_by 'kibana' }
   it { should be_grouped_into 'kibana' }
   it { should exist }
 end
 
-describe file('/opt/kibana/elastalert_plugin_installed.txt') do
-  it { should be_file }
-  it { should be_owned_by 'kibana' }
-  it { should be_grouped_into 'kibana' }
-  it { should exist }
+describe systemd_service('elastalert_server') do
+  it { should be_installed }
+  it { should be_enabled }
+  it { should be_running }
+end
+
+describe package('git') do
+  it { should be_installed }
+end
+
+describe file('/opt/elastalert') do
+  it { should be_a_directory }
+  it { should be_owned_by 'elastalert' }
+  it { should be_grouped_into 'elastalert' }
+end
+
+describe file('/opt/elastalert') do
+  it { should be_a_directory }
+  it { should be_owned_by 'elastalert' }
+  it { should be_grouped_into 'elastalert' }
+end
+
+describe file('/opt/elastalert-server') do
+  it { should be_a_directory }
+  it { should be_owned_by 'elastalert' }
+  it { should be_grouped_into 'elastalert' }
 end
 
 describe port(3030) do

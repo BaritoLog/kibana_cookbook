@@ -21,7 +21,6 @@ elast_log_dir = node['elastalert']['log_dir']
 elast_server_repo = node['elastalert_server']['repository']
 elast_server_name = "elastalert_server"
 elast_server_dir = node['elastalert_server']['directory']
-rule_templates_dir = node['elastalert']['rule_templates_dir']
 elastalert_plugin_ver = node['elastalert_plugin']['version']
 elastalert_plugin_name = "elastalert-kibana-plugin-#{elastalert_plugin_ver}-#{kibana_ver}"
 
@@ -33,7 +32,7 @@ else
   end
 end
 
-%w(python3-pip python3-setuptools build-essential libssl-dev libffi-dev python3-dev).each do |package|
+%w(python3-pip python3-setuptools build-essential libssl-dev libffi-dev python3-dev git).each do |package|
   apt_package package
 end
 
