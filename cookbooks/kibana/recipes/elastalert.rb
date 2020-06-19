@@ -196,8 +196,3 @@ service "#{elast_server_name}" do
   supports :status => true, :start => true, :restart => true, :stop => true
   provider Chef::Provider::Service::Systemd
 end
-
-service 'kibana' do
-  supports start: true, restart: true, stop: true, status: true
-  action [:enable, :restart]
-end
