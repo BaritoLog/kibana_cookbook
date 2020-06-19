@@ -25,15 +25,14 @@
       "cookbook_paths": ["{{user `cookbook_paths`}}"],
       "run_list": [
         "recipe[kibana::default]",
-        "recipe[kibana::elastalert]",
         "recipe[prometheus::kibana_exporter]"
       ],
       "json": {
         "kibana": {
-          "version": "7.5.0"
+          "version": "6.8.5"
         },
         "kibana_exporter": {
-          "kibana_version": "7.5.0"
+          "kibana_version": "6.8.5"
         }
       }
     }
