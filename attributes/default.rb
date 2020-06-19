@@ -1,7 +1,7 @@
 default['kibana']['url'] = nil
 default['kibana']['checksum'] = nil
 
-default['kibana']['version'] = '7.5.0'
+default['kibana']['version'] = '6.8.5'
 default['kibana']['distrib_checksum'] = 'd9d28d620a70a126747ee004042f4e728aaff05d9efc954739d3c15209acd4093321871423f486b51842a8e7b24ae969081702928802088c0e8bca22959e37aa'
 default['kibana']['distribution_base_url'] = 'https://artifacts.elastic.co/downloads/kibana'
 default['kibana']['user'] = 'kibana'
@@ -78,6 +78,6 @@ default['elastalert']['group'] = 'elastalert'
 default['elastalert']['directory'] = '/opt/elastalert'
 default['elastalert']['rules_directory'] = "rules"
 default['elastalert']['rule_templates_dir'] = "rule_templates"
-default['elastalert_plugin']['version'] = '1.1.0'
+default['elastalert_plugin']['version'] = '1.0.3'
 
 default['nodejs']['npm']['install_method'] = 'source'
