@@ -22,12 +22,13 @@ default['kibana']['config']['prometheus_url'] = 'http://localhost'
 default['kibana']['config']['message_format'] = 'Warning: TPS exceeded on these apps: %s. Please ask app group owner to increase TPS.'
 default['kibana']['config']['elastalert-kibana-plugin.serverHost'] = 'localhost'
 default['kibana']['config']['elastalert-kibana-plugin.serverPort'] = '3030'
+default['kibana']['config']['elastalert_installed'] = false
 
 
 default['kibana']['config']['security'] = {
-  "password" => "BOOTSTRAP_PASSWORD_CHANGE_ME", 
-  "username" => "kibana", 
-  "verificationMode" => "none", 
+  "password" => "BOOTSTRAP_PASSWORD_CHANGE_ME",
+  "username" => "kibana",
+  "verificationMode" => "none",
   "xpack.security.enabled" => false
 }
 

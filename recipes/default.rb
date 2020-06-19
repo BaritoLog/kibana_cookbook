@@ -19,11 +19,14 @@ kibana_config 'kibana' do
                 'elasticsearch.username' => node['kibana']['config']['security']['username'],
                 'elasticsearch.password' => node['kibana']['config']['security']['password'],
                 'elasticsearch.ssl.verificationMode' => node['kibana']['config']['security']['verificationMode'],
+                'elastalert_installed' => node['kibana']['config']['elastalert_installed'],
                 'elastalert-kibana-plugin.serverHost' => node['kibana']['config']['elastalert-kibana-plugin.serverHost'],
                 'elastalert-kibana-plugin.serverPort' => node['kibana']['config']['elastalert-kibana-plugin.serverPort']
 end
 
 include_recipe "kibana::nginx_install"
+
+include_recipe "kibana::elastalert" if node['kibana']['config']['elastalert_installed']
 
 service 'kibana' do
   supports start: true, restart: true, stop: true, status: true

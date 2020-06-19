@@ -266,12 +266,12 @@ ops.interval: <%= @config['ops.interval'] %>
 <% end -%>
 
 # Set the elastalert kibana plugin
-<% if @config.key?('elastalert-kibana-plugin.serverHost') %>
+<% if @config['elastalert_installed'] && @config.key?('elastalert-kibana-plugin.serverHost') %>
 elastalert-kibana-plugin.serverHost: <%= @config['elastalert-kibana-plugin.serverHost'] %>
 <% else -%>
 #elastalert-kibana-plugin.serverHost: localhost
 <% end -%>
-<% if @config.key?('elastalert-kibana-plugin.serverPort') %>
+<% if @config['elastalert_installed'] && @config.key?('elastalert-kibana-plugin.serverPort') %>
 elastalert-kibana-plugin.serverPort: <%= @config['elastalert-kibana-plugin.serverPort'] %>
 <% else -%>
 #elastalert-kibana-plugin.serverPort: 3030

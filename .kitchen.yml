@@ -85,7 +85,30 @@ suites:
     install_strategy: always
     run_list:
       - recipe[kibana::default]
-      - recipe[kibana::elastalert]
+    driver_config:
+      customize:
+        memory: 2048
+        cpus: 1
+      network:
+        - ['private_network', {ip: '192.168.33.10'}]
+    verifier:
+      inspec_tests:
+        - test/integration/default
+    attributes:
+      elastalert:
+        elasticsearch:
+          hostname: "192.168.20.10"
+      kibana:
+        version: "7.5.0"
+        config:
+          version: "7.5.0"
+          server.basePath: "/test_cluster"
+          elasticsearch.hosts: ["http://192.168.20.10:9200"]
+          elasticsearch.url: "http://192.168.20.10:9200"
+  - name: kibana-elastalert
+    install_strategy: always
+    run_list:
+      - recipe[kibana::default]
     driver_config:
       customize:
         memory: 2048
@@ -108,3 +131,4 @@ suites:
           server.basePath: "/test_cluster"
           elasticsearch.hosts: ["http://192.168.20.10:9200"]
           elasticsearch.url: "http://192.168.20.10:9200"
+          elastalert_installed: true
