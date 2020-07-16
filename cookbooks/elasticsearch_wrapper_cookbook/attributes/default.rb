@@ -28,10 +28,18 @@ default['elasticsearch']['minimum_master_nodes'] = 1
 default['elasticsearch']['routing_allocation_disk_watermark_low_threshold'] = "100gb"
 default['elasticsearch']['routing_allocation_disk_watermark_high_threshold'] = "50gb"
 default['elasticsearch']['routing_allocation_disk_watermark_flood_stage_threshold'] = "10gb"
+default['elasticsearch']['node_awareness_value'] = "$HOSTNAME"
+default['elasticsearch']['node_awareness_attribute'] = 'hostname'
+
+# ES 7.x
+default['elasticsearch']['initial_master_nodes'] = 'elasticsearch.service.consul'
+default['elasticsearch']['discovery_seed_hosts'] = 'elasticsearch.service.consul'
 
 # Explicitly set number of replicas, override this as necessary
 # Also you need to explicitly include `elasticsearch_set_replica` recipe
-default['elasticsearch']['index_number_of_replicas'] = 3
+default['elasticsearch']['index_number_of_shards'] = 3
+default['elasticsearch']['index_number_of_replicas'] = 1
+default['elasticsearch']['index_refresh_interval'] = "30s"
 
 # Java package to install by platform
 default['elasticsearch']['java'] = {
@@ -66,9 +74,123 @@ default['elasticsearch']['jvm_options'] = {
   '-Dlog4j2.disable.jmx' => true,
   '-Dlog4j.skipJansi' => true,
   '-XX:+HeapDumpOnOutOfMemoryError' => '',
+  '-XX:+CrashOnOutOfMemoryError' => '',
   '-Djava.io.tmpdir' => '/tmp',
 
   # Avoid crash when using AVX-512
   # https://github.com/elastic/elasticsearch/issues/31425
   '-XX:UseAVX' => 2
+}
+
+# Elasticsearch xpack enabled true variables
+default['elasticsearch']['security'] = {
+  'ca' => '',
+  'bootstrap_password' => '',
+  'xpack_security_enabled' => false,
+  'xpack_security_transport_ssl_enabled' => true,
+  'xpack_security_transport_ssl_verification_mode' => 'certificate',
+  'xpack_security_transport_ssl_keystore_path' => 'elastic-certificates.p12',
+  'xpack_security_transport_ssl_truststore_path' => 'elastic-certificates.p12'
+}
+
+default['elasticsearch']['override_base_template'] = false
+default['elasticsearch']['base_template'] = {
+  :index_patterns => ["*"]
+}
+
+default['elasticsearch']['base_template_es7'] = {
+  :order => -1,
+  :index_patterns => ["*"],
+  :settings => {
+    :index=>{
+      :codec => "best_compression",
+      :translog => {
+        :durability => "async"
+      }
+    }
+  },
+  :mappings =>{
+    :dynamic_templates =>[
+      {
+        :message_field =>{
+          :path_match =>"@message",
+          :match_mapping_type =>"string",
+          :mapping =>{
+            :type =>"text",
+            :norms =>false
+          }
+        }
+      },
+      {
+        :string_fields =>{
+          :match =>"*",
+          :match_mapping_type =>"string",
+          :mapping =>{
+            :type =>"text",
+            :norms =>false,
+            :fields =>{
+              :keyword =>{
+                :type =>"keyword",
+                :ignore_above =>256
+              }
+            }
+          }
+        }
+      }
+    ],
+    :properties =>{
+      :@timestamp=>{
+        :type =>"date"
+      }
+    }
+  }
+}
+
+default['elasticsearch']['base_template_es6'] = {
+  :order => -1,
+  :index_patterns => ["*"],
+  :settings => {
+    :index => {
+      :codec => "best_compression",
+      :translog => {
+        :durability=> "async"
+      }
+    }
+  },
+  :mappings =>{
+    :_doc =>{
+      :dynamic_templates =>[
+        {
+          :message_field =>{
+            :path_match =>"@message",
+            :match_mapping_type =>"string",
+            :mapping =>{
+              :type =>"text",
+              :norms =>false
+            }
+          }
+        },
+        {
+          :string_fields =>{
+            :match =>"*",
+            :match_mapping_type =>"string",
+            :mapping =>{
+              :type =>"text",:norms =>false,
+              :fields =>{
+                :keyword =>{
+                  :type =>"keyword",
+                  :ignore_above =>256
+                }
+              }
+            }
+          }
+        }
+      ],
+      :properties =>{
+        :@timestamp=>{
+          :type =>"date"
+        }
+      }
+    }
+  }
 }

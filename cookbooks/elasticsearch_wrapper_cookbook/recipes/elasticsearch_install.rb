@@ -9,7 +9,6 @@
 package_retries = node['elasticsearch']['package_retries']
 version = node['elasticsearch']['version']
 java = node['elasticsearch']['java']
-
 # Update apt packages
 apt_update 'update'
 
