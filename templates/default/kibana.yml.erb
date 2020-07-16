@@ -57,25 +57,25 @@ elasticsearch.url: <%= @config['elasticsearch.url'] %>
 <% end -%>
 <% end -%>
 
+<% if @config['kibana.version'] >= '7.0.0' %>
 # Time in milliseconds between requests to check Elasticsearch for an updated list of nodes.
 <% if @config.key?('elasticsearch.sniffInterval') %>
 elasticsearch.sniffInterval: <%= @config['elasticsearch.sniffInterval'] %>
 <% else -%>
 # elasticsearch.sniffInterval: false
 <% end -%>
-
 # Update the list of Elasticsearch nodes immediately following a connection fault.
 <% if @config.key?('elasticsearch.sniffOnConnectionFault') %>
 elasticsearch.sniffOnConnectionFault: <%= @config['elasticsearch.sniffOnConnectionFault'] %>
 <% else -%>
 # elasticsearch.sniffOnConnectionFault: false
 <% end -%>
-
 # Attempt to find other Elasticsearch nodes on startup.
 <% if @config.key?('elasticsearch.sniffOnStart') %>
 elasticsearch.sniffOnStart: <%= @config['elasticsearch.sniffOnStart'] %>
 <% else -%>
 # elasticsearch.sniffOnStart: false
+<% end -%>
 <% end -%>
 
 # When this setting's value is true Kibana uses the hostname specified in the server.host
@@ -106,12 +106,12 @@ kibana.defaultAppId: <%= @config['kibana.defaultAppId'] %>
 # the username and password that the Kibana server uses to perform maintenance on the Kibana
 # index at startup. Your Kibana users still need to authenticate with Elasticsearch, which
 # is proxied through the Kibana server.
-<% if @config.key?('xpack.security.enabled') && @config.key?('elasticsearch.username') %>
+<% if @config['xpack.security.enabled'] && @config.key?('elasticsearch.username') %>
 elasticsearch.username: <%= @config['elasticsearch.username'] %>
 <% else -%>
 #elasticsearch.username: "user"
 <% end -%>
-<% if @config.key?('xpack.security.enabled') && @config.key?('elasticsearch.password') %>
+<% if @config['xpack.security.enabled'] && @config.key?('elasticsearch.password') %>
 elasticsearch.password: <%= @config['elasticsearch.password'] %>
 <% else -%>
 #elasticsearch.password: "pass"
@@ -160,7 +160,7 @@ elasticsearch.ssl.verify: <%= @config['elasticsearch.ssl.verify'] %>
 
 # Controls the verification of the server certificate that Kibana receives
 # when making an outbound SSL/TLS connection to Elasticsearch.
-<% if @config.key?('xpack.security.enabled') && @config.key?('elasticsearch.ssl.verificationMode') %>
+<% if @config['xpack.security.enabled'] && @config.key?('elasticsearch.ssl.verificationMode') %>
 elasticsearch.ssl.verificationMode: <%= @config['elasticsearch.ssl.verificationMode'] %>
 <% else -%>
 #elasticsearch.ssl.verificationMode: full
@@ -215,7 +215,7 @@ elasticsearch.startupTimeout: <%= @config['elasticsearch.startupTimeout'] %>
 # X-Pack auth. If set to false, the login form,
 # user and role management screens, and authorization using Kibana
 # privileges are disabled.
-<% if @config.key?('xpack.security.enabled') %>
+<% if @config['xpack.security.enabled'] %>
 xpack.security.enabled: <%= @config['xpack.security.enabled'] %>
 <% else -%>
 #xpack.security.enabled: true
