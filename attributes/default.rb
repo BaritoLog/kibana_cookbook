@@ -79,5 +79,6 @@ default['elastalert']['directory'] = '/opt/elastalert'
 default['elastalert']['rules_directory'] = "rules"
 default['elastalert']['rule_templates_dir'] = "rule_templates"
 default['elastalert_plugin']['version'] = '1.0.3'
+default['elastalert_plugin']['repo'] = 'https://github.com/bitsensor/elastalert-kibana-plugin'
 
 default['nodejs']['npm']['install_method'] = 'source'

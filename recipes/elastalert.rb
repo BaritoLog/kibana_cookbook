@@ -21,6 +21,7 @@ elast_log_dir = node['elastalert']['log_dir']
 elast_server_repo = node['elastalert_server']['repository']
 elast_server_name = "elastalert_server"
 elast_server_dir = node['elastalert_server']['directory']
+elastalert_plugin_repo = node['elastalert_plugin']['repo']
 elastalert_plugin_ver = node['elastalert_plugin']['version']
 elastalert_plugin_name = "elastalert-kibana-plugin-#{elastalert_plugin_ver}-#{kibana_ver}"
 
@@ -128,7 +129,7 @@ execute "npm install elastalert" do
 end
 
 remote_file "/tmp/#{elastalert_plugin_name}.zip" do
-  source "https://github.com/bitsensor/elastalert-kibana-plugin/releases/download/#{elastalert_plugin_ver}/elastalert-kibana-plugin-#{elastalert_plugin_ver}-#{kibana_ver}.zip"
+  source "#{elastalert_plugin_repo}/releases/download/#{elastalert_plugin_ver}/elastalert-kibana-plugin-#{elastalert_plugin_ver}-#{kibana_ver}.zip"
   user kibana_user
   group kibana_group
   not_if { ::File.exist?("/tmp/#{elastalert_plugin_name}.zip") }
